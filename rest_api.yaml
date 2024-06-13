@@ -1,0 +1,416 @@
+openapi: 3.0.0
+info:
+  title: Travel Network API
+  description: API for publishing travel posts, rating, commenting, subscribing to travelers, searching popular places, and chatting.
+  version: 1.0.0
+servers:
+  - url: https://api.travelnetwork.com/v1
+    description: Production server
+  - url: https://sandbox.api.travelnetwork.com/v1
+    description: Sandbox server
+
+paths:
+  /posts:
+    get:
+      summary: Get all travel posts
+      responses:
+        '200':
+          description: A list of travel posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+    post:
+      summary: Create a new travel post
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            description: Unique idempotency key to prevent duplicate post creation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewPost'
+      responses:
+        '201':
+          description: The created post
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+
+  /posts/{postId}:
+    get:
+      summary: Get a travel post by ID
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The travel post
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+    put:
+      summary: Update a travel post by ID
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            description: Unique idempotency key to prevent duplicate updates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePost'
+      responses:
+        '200':
+          description: The updated post
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+    delete:
+      summary: Delete a travel post by ID
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: The post was deleted
+
+  /posts/{postId}/comments:
+    post:
+      summary: Comment on a travel post
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            description: Unique idempotency key to prevent duplicate comments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewComment'
+      responses:
+        '201':
+          description: The created comment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+
+  /posts/{postId}/rating:
+    post:
+      summary: Rate a travel post
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            description: Unique idempotency key to prevent duplicate ratings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Rating'
+      responses:
+        '201':
+          description: The created rating
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rating'
+
+  /subscriptions:
+    post:
+      summary: Subscribe to a traveler
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            description: Unique idempotency key to prevent duplicate subscriptions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+      responses:
+        '201':
+          description: The created subscription
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+
+  /top-places:
+    get:
+      summary: Get top travel places by country and city
+      parameters:
+        - name: country
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: city
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of top places
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TopPlace'
+
+  /chats:
+    get:
+      summary: Get all private messages
+      responses:
+        '200':
+          description: A list of private messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatMessage'
+    post:
+      summary: Send a private message
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            description: Unique idempotency key to prevent duplicate messages
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewChatMessage'
+      responses:
+        '201':
+          description: The sent message
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatMessage'
+
+  /feeds:
+    get:
+      summary: Get the feed of posts from subscribed travelers
+      responses:
+        '200':
+          description: A list of posts from the feed
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+
+components:
+  schemas:
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        photoUrl:
+          type: string
+        destinationLink:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        author:
+          $ref: '#/components/schemas/User'
+        ratings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Rating'
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+
+    NewPost:
+      type: object
+      required:
+        - title
+        - description
+        - photoUrl
+        - destinationLink
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        photoUrl:
+          type: string
+        destinationLink:
+          type: string
+
+    UpdatePost:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        photoUrl:
+          type: string
+        destinationLink:
+          type: string
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+        postId:
+          type: string
+        userId:
+          type: string
+        text:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    NewComment:
+      type: object
+      required:
+        - text
+      properties:
+        text:
+          type: string
+
+    Rating:
+      type: object
+      properties:
+        id:
+          type: string
+        postId:
+          type: string
+        userId:
+          type: string
+        score:
+          type: integer
+          minimum: 1
+          maximum: 5
+        createdAt:
+          type: string
+          format: date-time
+
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        subscribedToId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    TopPlace:
+      type: object
+      properties:
+        country:
+          type: string
+        city:
+          type: string
+        description:
+          type: string
+        photoUrl:
+          type: string
+        popularityScore:
+          type: integer
+
+    ChatMessage:
+      type: object
+      properties:
+        id:
+          type: string
+        senderId:
+          type: string
+        receiverId:
+          type: string
+        message:
+          type: string
+        sentAt:
+          type: string
+          format: date-time
+
+    NewChatMessage:
+      type: object
+      required:
+        - receiverId
+        - message
+      properties:
+        receiverId:
+          type: string
+        message:
+          type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
