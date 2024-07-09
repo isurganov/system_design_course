@@ -1,0 +1,47 @@
+C4Container
+title Container diagram for Traveler Social Network
+
+System_Ext(authService, "Authentication Service", "External service for user authentication")
+System_Ext(geoService, "Geo Service", "External service for handling geolocation")
+Person(traveler, "Traveler", "A user of the social network")
+
+Container_Boundary(c1, "Traveler Social Network") {
+    Container(webApp, "Web Application", "JavaScript, React", "Provides the social network functionality to users via web browsers")
+    Container(mobileApp, "Mobile App", "Swift/Kotlin", "Provides the social network functionality to users via mobile devices")
+    Container(api, "API Server", "Node.js, Express", "Handles all API requests from web and mobile apps")
+    Container(loadBalancer, "Load Balancer", "Nginx", "Distributes incoming network traffic across multiple servers")
+    Container(kafka, "Kafka", "Apache Kafka", "Handles asynchronous messaging and event streaming")
+    Container(redis, "Redis", "Redis", "Handles caching and session storage")
+    Container(fileStorage, "File Storage", "Amazon S3", "Stores user-generated content like images and videos")
+    ContainerDb(mainDatabase, "Main Database", "PostgreSQL", "Stores user data, travel logs, and interactions")
+    ContainerDb(logDatabase, "Log Database", "Elasticsearch", "Stores application logs for monitoring and analysis")
+    ContainerDb(analyticsDatabase, "Analytics Database", "BigQuery", "Stores analytics data for business intelligence")
+}
+
+Rel(traveler, webApp, "Uses", "HTTPS")
+Rel(traveler, mobileApp, "Uses", "HTTPS")
+Rel(webApp, loadBalancer, "Forwards requests to", "HTTPS")
+Rel(mobileApp, loadBalancer, "Forwards requests to", "HTTPS")
+Rel(loadBalancer, api, "Distributes traffic to", "HTTPS")
+Rel(api, mainDatabase, "Reads from and writes to", "JDBC")
+Rel(api, kafka, "Publishes events to", "Kafka")
+Rel(api, redis, "Uses for caching", "Redis Protocol")
+Rel(api, authService, "Uses", "OAuth")
+Rel(api, geoService, "Uses", "JSON/HTTPS")
+Rel(api, fileStorage, "Stores and retrieves files from", "S3 Protocol")
+Rel(kafka, logDatabase, "Sends logs to", "JSON/HTTPS")
+Rel(kafka, analyticsDatabase, "Sends analytics events to", "JSON/HTTPS")
+
+UpdateRelStyle(traveler, webApp, $offsetY="60", $offsetX="90")
+UpdateRelStyle(traveler, mobileApp, $offsetY="-30")
+UpdateRelStyle(webApp, loadBalancer, $offsetX="130")
+UpdateRelStyle(mobileApp, loadBalancer, $offsetY="-40")
+UpdateRelStyle(loadBalancer, api, $offsetY="-20", $offsetX="5")
+UpdateRelStyle(api, mainDatabase, $offsetY="-20", $offsetX="5")
+UpdateRelStyle(api, kafka, $offsetY="-60")
+UpdateRelStyle(api, redis, $offsetY="-40")
+UpdateRelStyle(api, authService, $offsetY="-60")
+UpdateRelStyle(api, geoService, $offsetY="-50", $offsetX="-140")
+UpdateRelStyle(api, fileStorage, $offsetY="-20", $offsetX="5")
+UpdateRelStyle(kafka, logDatabase, $offsetX="-140")
+UpdateRelStyle(kafka, analyticsDatabase, $offsetX="-140")

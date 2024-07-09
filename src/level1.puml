@@ -1,0 +1,27 @@
+C4Context
+title System Context diagram for Traveler Social Network
+
+Enterprise_Boundary(b0, "TravelerSocialNetwork") {
+    Person(traveler, "Traveler", "A user of the social network who can create and share travel experiences.")
+    Person_Ext(authService, "Authentication Service", "External service for user authentication.")
+    Person_Ext(geoService, "Geo Service", "External service for handling geolocation.")
+    
+    System(travelApp, "Traveler Social Network", "Allows travelers to create, share, and discover travel experiences.")
+
+    Enterprise_Boundary(b1, "TravelerSocialNetwork Internal") {
+        SystemDb(travelDb, "Traveler Social Network Database", "Stores user data, travel posts, and interactions.")
+    }
+}
+
+Rel(traveler, travelApp, "Uses")
+Rel(travelApp, authService, "Uses")
+Rel(travelApp, geoService, "Uses")
+Rel(travelApp, travelDb, "Reads from and writes to")
+
+UpdateElementStyle(traveler, $fontColor="black", $bgColor="lightblue", $borderColor="blue")
+UpdateRelStyle(traveler, travelApp, $textColor="blue", $lineColor="blue", $offsetX="5")
+UpdateRelStyle(travelApp, authService, $textColor="green", $lineColor="green", $offsetY="-10")
+UpdateRelStyle(travelApp, geoService, $textColor="red", $lineColor="red", $offsetY="-40", $offsetX="-50")
+UpdateRelStyle(travelApp, travelDb, $textColor="purple", $lineColor="purple", $offsetX="5", $offsetY="10")
+
+UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
